@@ -2,6 +2,7 @@ datasets:
   transcripts:
     path: C:\Users\nickz\cuhk_app\docetl\data.json
     type: file
+default_model: openai/gpt-5-nano
 bypass_cache: true
 operations:
 - name: extract_filler
@@ -29,5 +30,6 @@ optimizer_config:
   evaluation_file: evaluate_fillers.py
   metric_key: filler_extraction_score
   max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-nano
+  dataset_path: data.json
   model: openai/gpt-5-nano
-default_model: openai/gpt-5-nano

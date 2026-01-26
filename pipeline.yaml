@@ -3,7 +3,7 @@ datasets:
     path: data.json
     type: file
 
-default_model: openai/gpt-5-nano
+default_model: openai/gpt-5-mini
 bypass_cache: true
 
 operations:
@@ -29,10 +29,24 @@ optimizer_config:
   type: moar
   save_dir: results/moar_optimization/results
   available_models:  # LiteLLM model names - ensure API keys are set in your environment
-    - openai/gpt-5-nano
+    - openai/gpt-5-mini
   evaluation_file: evaluate_fillers.py
   metric_key: filler_extraction_score  # This must match a key in your evaluation function's return dictionary
   max_iterations: 10
-  rewrite_agent_model: openai/gpt-5-nano
+  rewrite_agent_model: openai/gpt-5-mini
   dataset_path: data.json  # Optional: use sample/hold-out dataset
-  model: openai/gpt-5-nano
+  model: openai/gpt-5-mini
+
+rate_limits:
+  embedding_call:
+    - count: 100000
+      per: 1
+      unit: second
+  llm_call:
+    - count: 1000000
+      per: 1
+      unit: second
+  llm_tokens:
+    - count: 10000000
+      per: 1
+      unit: minute
