@@ -1,0 +1,21 @@
+
+                ================================================================================
+                Timestamp: 2026-01-25 18:52:25
+                Node ID: 1
+                Parent ID: 0
+                Latest Action: None
+                Failure Type: execution_failure
+                YAML Path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results\pipeline_openai_gpt-5-nano.yaml
+                Error Message: 'remaining_time'
+                ================================================================================
+                
+                ================================================================================
+                Timestamp: 2026-01-25 18:52:25
+                Node ID: 1
+                Parent ID: 0
+                Latest Action: None
+                Failure Type: simulation_execution_failure
+                YAML Path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results\pipeline_openai_gpt-5-nano.yaml
+                Error Message: Failed to execute plan C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results\pipeline_openai_gpt-5-nano.yaml: 'remaining_time'
+                ================================================================================
+                

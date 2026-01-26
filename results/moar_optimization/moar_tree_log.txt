@@ -1,0 +1,4 @@
+Search Graph Visits and Values Log
+Root YAML: pipeline.yaml
+Max iterations: 10
+==================================================

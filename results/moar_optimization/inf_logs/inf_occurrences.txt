@@ -1,0 +1,21 @@
+
+                ================================================================================
+                Timestamp: 2026-01-25 18:42:25
+                Node ID: 1
+                Parent ID: 0
+                Latest Action: None
+                Failure Type: execution_failure
+                YAML Path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\pipeline_gpt-5-nano.yaml
+                Error Message: Note: You may also need to prefix your model name with the provider, e.g. 'openai/gpt-4o-mini' or 'gemini/gemini-1.5-flash' to conform to LiteLLM API standards. Original error: litellm.RateLimitError: RateLimitError: OpenAIException - Rate limit reached for gpt-5-nano in organization org-29TdVH2SL595oBAfWPjsNIX8 on tokens per min (TPM): Limit 200000, Used 200000, Requested 11514. Please try again in 3.454s. Visit https://platform.openai.com/account/rate-limits to learn more.
+                ================================================================================
+                
+                ================================================================================
+                Timestamp: 2026-01-25 18:42:25
+                Node ID: 1
+                Parent ID: 0
+                Latest Action: None
+                Failure Type: simulation_execution_failure
+                YAML Path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\pipeline_gpt-5-nano.yaml
+                Error Message: Failed to execute plan C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\pipeline_gpt-5-nano.yaml: Note: You may also need to prefix your model name with the provider, e.g. 'openai/gpt-4o-mini' or 'gemini/gemini-1.5-flash' to conform to LiteLLM API standards. Original error: litellm.RateLimitError: RateLimitError: OpenAIException - Rate limit reached for gpt-5-nano in organization org-29TdVH2SL595oBAfWPjsNIX8 on tokens per min (TPM): Limit 200000, Used 200000, Requested 11514. Please try again in 3.454s. Visit https://platform.openai.com/account/rate-limits to learn more.
+                ================================================================================
+                

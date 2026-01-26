@@ -1,0 +1,33 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data.json
+    type: file
+bypass_cache: true
+operations:
+- name: extract_filler
+  type: map
+  output:
+    schema:
+      filler_words: list[str]
+  prompt: 'Extract all instances of filler words spoken in: {{ input.content }}
+
+    '
+pipeline:
+  steps:
+  - name: extract_fillers
+    input: transcripts
+    operations:
+    - extract_filler
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results\pipeline_openai_gpt-5-nano.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results
+  available_models:
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_fillers.py
+  metric_key: filler_extraction_score
+  max_iterations: 10
+  model: openai/gpt-5-nano
+default_model: openai/gpt-5-nano

@@ -1,0 +1,3 @@
+Checkpoint for Jan 25 2026:
+
+After git cloning the repository, got started by running the docker container for the playground. My file uploading kept timing out but switching to the DocETL hosted instance worked fine for normal pipelines. However, issue came when trying to run the actual optimizer (simply pressing the optimize button for one step) which is where I am currently stuck on an issue with API rate limits. The final error before the program breaks is likely related, but I am not sure how because of the lack of a stack trace to debug. Same issue occurs also when trying to run the pipeline with ```docetl build pipeline.yaml --optimizer moar``` from the command line on my local machine.
