@@ -1,4 +1,5 @@
 import os
+import traceback
 from pathlib import Path
 
 import typer
@@ -177,6 +178,7 @@ def build(
             if results.get("evaluation_file"):
                 typer.echo(f"   Evaluation: {results['evaluation_file']}")
         except Exception as e:
+            traceback.print_exc()
             typer.echo(f"Error running MOAR optimization: {e}", err=True)
             raise typer.Exit(1)
 

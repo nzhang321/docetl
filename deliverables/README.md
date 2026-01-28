@@ -1,3 +1,13 @@
-Checkpoint for Jan 25 2026:
+This project was run on my local machine with Windows 10 and Python 3.10 and the newest version of pip installed. I created a fork of the docetl repo which I cloned to my local machine. Then I checked out to the repository and ran the project in a virtual environment with the following commands:
+```
 
-After git cloning the repository, got started by running the docker container for the playground. My file uploading kept timing out but switching to the DocETL hosted instance worked fine for normal pipelines. However, issue came when trying to run the actual optimizer (simply pressing the optimize button for one step) which is where I am currently stuck on an issue with API rate limits. The final error before the program breaks is likely related, but I am not sure how because of the lack of a stack trace to debug. Same issue occurs also when trying to run the pipeline with ```docetl build pipeline.yaml --optimizer moar``` from the command line on my local machine.
+```
+
+
+Results
+    Reproduce: 
+    Break:
+    Break 1: 
+        score of 46 extracted, only beaten by pipelines 5 and 8.
+        the only one of the pipelines that used a code directive was pipeline 13, which processes the document with a pointless truncation of the first 200 and last 50 words if the document is longer than 250 words, which could potentially miss a place name (ie if the moderator of the speech introduces the place that they are speaking from and it is not brought up again).
+        A smarter approach to filter much more quickly is to realize that because place names are proper nouns, a simple filter for capitalized words could already greatly reduce the number of tokens needed to be processed with LLM calls  

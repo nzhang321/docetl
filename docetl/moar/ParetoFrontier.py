@@ -1,5 +1,6 @@
 import os
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from pathlib import Path
 
 import matplotlib
 
@@ -318,7 +319,7 @@ class ParetoFrontier:
         self.frontier_plans = frontier
         self.frontier_data = new_frontier_data
         if new_node.id > 0:
-            graph_dir = str(new_node.yaml_file_path).rsplit("/", 1)[0] + "/graph/"
+            graph_dir = str(Path(new_node.yaml_file_path).with_suffix('')) + "/graph/"
             os.makedirs(graph_dir, exist_ok=True)
             save_path = graph_dir + f"plan_{new_node.id}.png"
             self.plot_plans(save_path, new_node.id, str(new_node.yaml_file_path))

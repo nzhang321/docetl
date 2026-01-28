@@ -2,3 +2,423 @@ Search Graph Visits and Values Log
 Root YAML: pipeline.yaml
 Max iterations: 10
 ==================================================
+
+==================================================
+ITERATION 0
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_resolve_to_map_with_categories: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- deterministic_doc_compression: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_reduce_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- swap_with_code: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- clarify_instructions: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- take_head_tail: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- arbitrary_rewrite: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_to_map_resolve_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+
+Tree Structure:
+Node ID: 0, Visits: 1, Value: 0, Action: ROOT
+  Node ID: 2, Visits: 1, Value: 0, Action: change to openai/gpt-5-nano
+
+Total search cost: $0.00
+
+==================================================
+ITERATION 1
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_resolve_to_map_with_categories: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- deterministic_doc_compression: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- swap_with_code: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- take_head_tail: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- arbitrary_rewrite: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_to_map_resolve_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+
+Tree Structure:
+Node ID: 0, Visits: 5, Value: -3, Action: ROOT
+  Node ID: 2, Visits: 5, Value: -3, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -3, Action: doc_chunking
+
+Total search cost: $0.05
+
+==================================================
+ITERATION 2
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_resolve_to_map_with_categories: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- deterministic_doc_compression: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -9.0000
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- swap_with_code: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- take_head_tail: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- arbitrary_rewrite: 1.0 uses, avg change in cost: -0.00, avg change in accuracy: +212.0000
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_to_map_resolve_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+
+Tree Structure:
+Node ID: 0, Visits: 8, Value: -206.0, Action: ROOT
+  Node ID: 2, Visits: 8, Value: -206.0, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -215, Action: doc_chunking
+    Node ID: 5, Visits: 0, Value: 0, Action: deterministic_doc_compression
+    Node ID: 4, Visits: 1, Value: 221.0, Action: arbitrary_rewrite
+
+Total search cost: $0.11
+
+==================================================
+ITERATION 3
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_resolve_to_map_with_categories: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- deterministic_doc_compression: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -9.0000
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- swap_with_code: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- take_head_tail: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- arbitrary_rewrite: 1.0 uses, avg change in cost: -0.00, avg change in accuracy: +212.0000
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_to_map_resolve_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+
+Tree Structure:
+Node ID: 0, Visits: 8, Value: -427.0, Action: ROOT
+  Node ID: 2, Visits: 8, Value: -427.0, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -215, Action: doc_chunking
+    Node ID: 5, Visits: 1, Value: -221, Action: deterministic_doc_compression
+    Node ID: 4, Visits: 1, Value: 221.0, Action: arbitrary_rewrite
+
+Total search cost: $0.11
+
+==================================================
+ITERATION 4
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 1.0 uses, avg change in cost: +0.01, avg change in accuracy: +1.0000
+- map_resolve_to_map_with_categories: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- deterministic_doc_compression: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -9.0000
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- swap_with_code: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- take_head_tail: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- arbitrary_rewrite: 1.0 uses, avg change in cost: -0.00, avg change in accuracy: +212.0000
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- map_to_map_resolve_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+
+Tree Structure:
+Node ID: 0, Visits: 11, Value: -638.0, Action: ROOT
+  Node ID: 2, Visits: 11, Value: -638.0, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -215, Action: doc_chunking
+    Node ID: 5, Visits: 1, Value: -221, Action: deterministic_doc_compression
+    Node ID: 4, Visits: 2, Value: 221.0, Action: arbitrary_rewrite
+    Node ID: 6, Visits: 1, Value: -211, Action: chaining
+
+Total search cost: $0.14
+
+==================================================
+ITERATION 5
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 1.0 uses, avg change in cost: +0.01, avg change in accuracy: +1.0000
+- map_resolve_to_map_with_categories: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- deterministic_doc_compression: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -9.0000
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- swap_with_code: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- take_head_tail: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -219.0000
+- arbitrary_rewrite: 1.0 uses, avg change in cost: -0.00, avg change in accuracy: +212.0000
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_to_map_resolve_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+
+Tree Structure:
+Node ID: 0, Visits: 17, Value: -857.0, Action: ROOT
+  Node ID: 2, Visits: 17, Value: -857.0, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -215, Action: doc_chunking
+    Node ID: 5, Visits: 1, Value: -221, Action: deterministic_doc_compression
+    Node ID: 4, Visits: 7, Value: 2.0, Action: arbitrary_rewrite
+      Node ID: 8, Visits: 1, Value: -219, Action: take_head_tail
+    Node ID: 6, Visits: 1, Value: -211, Action: chaining
+    Node ID: 7, Visits: 0, Value: 0, Action: doc_summarization
+
+Total search cost: $0.20
+
+==================================================
+ITERATION 6
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 1.0 uses, avg change in cost: +0.01, avg change in accuracy: +1.0000
+- map_resolve_to_map_with_categories: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- deterministic_doc_compression: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -9.0000
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- swap_with_code: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- take_head_tail: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -219.0000
+- arbitrary_rewrite: 1.0 uses, avg change in cost: -0.00, avg change in accuracy: +212.0000
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_to_map_resolve_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+
+Tree Structure:
+Node ID: 0, Visits: 17, Value: -1072.0, Action: ROOT
+  Node ID: 2, Visits: 17, Value: -1072.0, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -215, Action: doc_chunking
+    Node ID: 5, Visits: 1, Value: -221, Action: deterministic_doc_compression
+    Node ID: 4, Visits: 7, Value: 2.0, Action: arbitrary_rewrite
+      Node ID: 8, Visits: 1, Value: -219, Action: take_head_tail
+    Node ID: 6, Visits: 1, Value: -211, Action: chaining
+    Node ID: 7, Visits: 1, Value: -215, Action: doc_summarization
+
+Total search cost: $0.20
+
+==================================================
+ITERATION 7
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 1.0 uses, avg change in cost: +0.01, avg change in accuracy: +1.0000
+- map_resolve_to_map_with_categories: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- deterministic_doc_compression: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -9.0000
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: -1.5000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- swap_with_code: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- take_head_tail: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -219.0000
+- arbitrary_rewrite: 2.0 uses, avg change in cost: -0.00, avg change in accuracy: +106.0000
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_to_map_resolve_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+
+Tree Structure:
+Node ID: 0, Visits: 20, Value: -1072.0, Action: ROOT
+  Node ID: 2, Visits: 20, Value: -1072.0, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -215, Action: doc_chunking
+    Node ID: 5, Visits: 1, Value: -221, Action: deterministic_doc_compression
+    Node ID: 4, Visits: 10, Value: 2.0, Action: arbitrary_rewrite
+      Node ID: 8, Visits: 1, Value: -219, Action: take_head_tail
+      Node ID: 9, Visits: 1, Value: -inf, Action: isolating_subtasks
+    Node ID: 6, Visits: 1, Value: -211, Action: chaining
+    Node ID: 7, Visits: 1, Value: -215, Action: doc_summarization
+
+Total search cost: $0.23
+
+==================================================
+ITERATION 8
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 1.0 uses, avg change in cost: +0.01, avg change in accuracy: +1.0000
+- map_resolve_to_map_with_categories: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- deterministic_doc_compression: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -9.0000
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: -1.5000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- swap_with_code: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- take_head_tail: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -219.0000
+- arbitrary_rewrite: 2.0 uses, avg change in cost: -0.00, avg change in accuracy: +106.0000
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_to_map_resolve_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+
+Tree Structure:
+Node ID: 0, Visits: 23, Value: -1072.0, Action: ROOT
+  Node ID: 2, Visits: 23, Value: -1072.0, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -215, Action: doc_chunking
+    Node ID: 5, Visits: 1, Value: -221, Action: deterministic_doc_compression
+    Node ID: 4, Visits: 13, Value: 2.0, Action: arbitrary_rewrite
+      Node ID: 8, Visits: 1, Value: -219, Action: take_head_tail
+      Node ID: 9, Visits: 1, Value: -inf, Action: isolating_subtasks
+      Node ID: 10, Visits: 1, Value: 0, Action: gleaning
+    Node ID: 6, Visits: 1, Value: -211, Action: chaining
+    Node ID: 7, Visits: 1, Value: -215, Action: doc_summarization
+
+Total search cost: $0.25
+
+==================================================
+ITERATION 9
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.5000
+- map_resolve_to_map_with_categories: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- change model cost: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_summarization: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- deterministic_doc_compression: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -9.0000
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: -1.5000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- swap_with_code: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- take_head_tail: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -219.0000
+- arbitrary_rewrite: 2.0 uses, avg change in cost: -0.00, avg change in accuracy: +106.0000
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: -0.5000
+- map_to_map_resolve_reduce: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+
+Tree Structure:
+Node ID: 0, Visits: 27, Value: -1285.0, Action: ROOT
+  Node ID: 2, Visits: 27, Value: -1285.0, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -215, Action: doc_chunking
+    Node ID: 5, Visits: 1, Value: -221, Action: deterministic_doc_compression
+    Node ID: 4, Visits: 15, Value: 2.0, Action: arbitrary_rewrite
+      Node ID: 8, Visits: 1, Value: -219, Action: take_head_tail
+      Node ID: 9, Visits: 1, Value: -inf, Action: isolating_subtasks
+      Node ID: 10, Visits: 1, Value: 0, Action: gleaning
+    Node ID: 6, Visits: 1, Value: -211, Action: chaining
+    Node ID: 7, Visits: 1, Value: -215, Action: doc_summarization
+    Node ID: 11, Visits: 1, Value: -213, Action: doc_chunking_topk
+
+Total search cost: $0.29
+
+==================================================
+ITERATION 10
+==================================================
+Action Performance Statistics:
+- hierarchical_reduce: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chaining: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.5000
+- map_resolve_to_map_with_categories: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- change model cost: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- doc_summarization: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -3.0000
+- deterministic_doc_compression: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -9.0000
+- reduce_gleaning: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: -1.5000
+- reduce_chaining: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- gleaning: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- map_reduce_fusion: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- swap_with_code: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- clarify_instructions: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- operator_fusion: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- cascade_filtering: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- isolating_subtasks: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+- take_head_tail: 1.0 uses, avg change in cost: +0.00, avg change in accuracy: -219.0000
+- arbitrary_rewrite: 2.0 uses, avg change in cost: -0.00, avg change in accuracy: +106.0000
+- change to openai/gpt-5-nano: 0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- chunk_header_summary: 0.0 uses, avg change in cost: Unknown (never tried), avg change in accuracy: Unknown (never tried)
+- doc_chunking_topk: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: -0.5000
+- map_to_map_resolve_reduce: 2.0 uses, avg change in cost: +0.00, avg change in accuracy: +0.0000
+
+Tree Structure:
+Node ID: 0, Visits: 28, Value: -1285.0, Action: ROOT
+  Node ID: 2, Visits: 28, Value: -1285.0, Action: change to openai/gpt-5-nano
+    Node ID: 3, Visits: 1, Value: -215, Action: doc_chunking
+    Node ID: 5, Visits: 1, Value: -221, Action: deterministic_doc_compression
+    Node ID: 4, Visits: 16, Value: 2.0, Action: arbitrary_rewrite
+      Node ID: 8, Visits: 1, Value: -219, Action: take_head_tail
+      Node ID: 9, Visits: 1, Value: -inf, Action: isolating_subtasks
+      Node ID: 10, Visits: 1, Value: 0, Action: gleaning
+      Node ID: 12, Visits: 1, Value: 0, Action: change model cost
+    Node ID: 6, Visits: 1, Value: -211, Action: chaining
+    Node ID: 7, Visits: 1, Value: -215, Action: doc_summarization
+    Node ID: 11, Visits: 1, Value: -213, Action: doc_chunking_topk
+
+Total search cost: $0.31
