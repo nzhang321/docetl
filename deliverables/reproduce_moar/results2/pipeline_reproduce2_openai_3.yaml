@@ -1,0 +1,81 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: extract_measure_words
+  type: map
+  output:
+    schema:
+      measure_words: list[str]
+  prompt: 'Extract all instances in: {{ input.content }} where the speaker uses a
+    measure word. These are not numerical words but words specifying a unit such as
+    "drop" in the phrase "a drop of water" or "flock" in "a flock of geese".
+
+    '
+  gleaning:
+    validation_prompt: "You are a quality judge for a list of extracted measure expressions\
+      \ called \"measure_words\" that were produced from a single source document.\
+      \ Your job is to determine whether the list is correct and to provide precise,\
+      \ actionable corrections if it is not.\n\nChecks to perform for each item:\n\
+      1) Exact excerpt: Each item must be an exact substring taken from the source\
+      \ document (no paraphrase). If an item is not an exact excerpt, mark it invalid\
+      \ and supply the exact excerpt from the document that should replace it.\n2)\
+      \ Contains a measure word: The excerpt must contain a word that denotes a unit,\
+      \ measure, or collective (examples: drop, flock, minute/minutes, pound(s), percent,\
+      \ units, people, nations). Purely numeric tokens alone (e.g., \"15,000\" with\
+      \ no unit) are invalid.\n3) Conciseness: The excerpt should be a short phrase\
+      \ that clearly shows the measurement (preferably no more than ~12 words). If\
+      \ an item is overly long, suggest a shorter exact excerpt from the document\
+      \ that preserves the measure.\n4) No duplicates: Remove duplicate excerpts.\n\
+      \nDecision rule:\n- Return PASS only if every item passes all checks and there\
+      \ are no duplicates.\n- Otherwise return FAIL.\n\nOutput format (must follow\
+      \ exactly):\n- First line: either PASS or FAIL\n- If PASS: on the second line\
+      \ write a brief one-line confirmation (e.g., \"All items are valid.\")\n- If\
+      \ FAIL: on the second line output a JSON object with a single key \"feedback\"\
+      \ whose value is a list of objects. Each object must include:\n  {\n    \"index\"\
+      : <index of the problematic item in the provided list, zero-based>,\n    \"\
+      issue\": \"short explanation of what is wrong (e.g., not an exact excerpt; missing\
+      \ unit; purely numeric; duplicate; too long)\",\n    \"corrected\": \"the exact\
+      \ excerpt from the original document that should replace this item (or null\
+      \ if none found)\"\n  }\n- After the JSON feedback object, add one final short\
+      \ sentence summarizing the top-level fixes needed.\n\nWhen suggesting \"corrected\"\
+      \ excerpts, do not invent text; provide the exact substring as it appears in\
+      \ the document. If multiple valid measure excerpts exist nearby, choose the\
+      \ shortest clear phrase that contains the unit. If no suitable exact excerpt\
+      \ exists for an item, set \"corrected\" to null and explain why in \"issue\"\
+      .\n\nBe concise and precise so the upstream generator can use your feedback\
+      \ to refine the list."
+    num_rounds: 3
+    model: openai/gpt-5-nano
+pipeline:
+  steps:
+  - name: extract_measure_words
+    input: transcripts
+    operations:
+    - extract_measure_words
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results2\pipeline_reproduce2_openai_3.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results2
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_measures.py
+  metric_key: measure_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

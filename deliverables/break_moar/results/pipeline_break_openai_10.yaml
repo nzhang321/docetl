@@ -1,0 +1,87 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-mini
+bypass_cache: true
+operations:
+- name: summarize_for_place_extraction
+  type: map
+  prompt: 'Summarize the following transcript into a condensed version that preserves
+    all information needed to extract place names.
+
+
+    Requirements:
+
+    - Preserve every place name mention exactly as it appears in the original text
+    (do not paraphrase or normalize spellings).
+
+    - For each place mention, include the full sentence (or clause) containing the
+    mention. If a speaker label appears immediately before the sentence (e.g., "JOE
+    BIDEN:"), keep that label.
+
+    - If a place is mentioned multiple times in differing contexts, include representative
+    sentence(s) to preserve context; otherwise include at least one occurrence.
+
+    - Remove irrelevant content (small talk, filler, procedural instructions, audience
+    cues, time stamps, irrelevant tangents) so the condensed transcript is as short
+    as possible while preserving place mentions and minimal surrounding context to
+    disambiguate them.
+
+    - At the top of the output, provide an ordered list called "PLACES:" containing
+    every place name found, in order of first appearance, each on its own line and
+    exactly as spelled in the original.
+
+    - Then include a section called "CONDENSED_TRANSCRIPT:" containing the kept sentences/clauses
+    (with speaker labels if present), separated by blank lines.
+
+
+    Only use the text below. Transcript:
+
+
+    {{ input.content }}'
+  model: openai/gpt-5-nano
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      content: string
+- name: extract_place_names
+  type: map
+  output:
+    schema:
+      place_names: list[str]
+  prompt: 'Extract all instances in: {{ input.content }} where the speaker mentions
+    a place name.
+
+    '
+pipeline:
+  steps:
+  - name: extract_place_names
+    input: transcripts
+    operations:
+    - summarize_for_place_extraction
+    - extract_place_names
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results\pipeline_break_openai_10.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_place_names.py
+  metric_key: place_name_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

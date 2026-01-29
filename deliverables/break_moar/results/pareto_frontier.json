@@ -1,0 +1,50 @@
+[
+  {
+    "node_id": 7,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results2\\pipeline_break1_openai_7.yaml",
+    "cost": 0.0,
+    "accuracy": 0
+  },
+  {
+    "node_id": 13,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results2\\pipeline_break1_openai_13.yaml",
+    "cost": 0.0006588999999999999,
+    "accuracy": 3
+  },
+  {
+    "node_id": 11,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results2\\pipeline_break1_openai_11.yaml",
+    "cost": 0.0032234499999999997,
+    "accuracy": 29
+  },
+  {
+    "node_id": 2,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results2\\pipeline_break1_openai_gpt-5-nano.yaml",
+    "cost": 0.00350785,
+    "accuracy": 31
+  },
+  {
+    "node_id": 9,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results2\\pipeline_break1_openai_9.yaml",
+    "cost": 0.005137849999999999,
+    "accuracy": 32
+  },
+  {
+    "node_id": 1,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results2\\pipeline_break1_openai_gpt-5-mini.yaml",
+    "cost": 0.01182925,
+    "accuracy": 40
+  },
+  {
+    "node_id": 5,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results2\\pipeline_break1_openai_5.yaml",
+    "cost": 0.01966825,
+    "accuracy": 51
+  },
+  {
+    "node_id": 8,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results2\\pipeline_break1_openai_8.yaml",
+    "cost": 0.0223587,
+    "accuracy": 54
+  }
+]

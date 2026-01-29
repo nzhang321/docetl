@@ -1,0 +1,162 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: compress_measure_sentences_context
+  type: code_map
+  code: "def transform(input_doc):\n    import re\n    import html\n\n    content\
+    \ = input_doc.get('content', '')\n    if not content:\n        return {'content':\
+    \ ''}\n\n    # Normalize HTML entities\n    content = html.unescape(content)\n\
+    \    content_len = len(content)\n\n    # Focused list of measure words / unit\
+    \ indicators (smaller set than other instantiations)\n    measures = [\n     \
+    \   'drop', 'flock', 'pair', 'dozen', 'handful', 'slice', 'bunch', 'cup', 'glass',\n\
+    \        'bottle', 'pint', 'quart', 'gallon', 'ounce', 'pound', 'kg', 'lb', 'meter',\n\
+    \        'mile', 'inch', 'minute', 'second', 'hour', 'day', 'week', 'month', 'year',\n\
+    \        'percent', '%', 'people', 'jobs', 'units', 'bomb', 'insulin', 'unit',\
+    \ 'unit(s)'\n    ]\n\n    # Build regexes emphasizing sentence-level matches and\
+    \ numeric/currency contexts\n    # 1) number (digits or common word numbers) +\
+    \ measure\n    number_words = r'(?:a|an|one|two|three|four|five|six|seven|eight|nine|ten)'\n\
+    \    number_pattern = r'(?:\\b' + number_words + r'\\b|\\b\\d[\\d,\\.]*\\b)'\n\
+    \n    measures_group = r'(?:' + '|'.join(re.escape(m) for m in measures) + r')\\\
+    b'\n\n    patterns = [\n        number_pattern + r'\\s+' + measures_group,   \
+    \           # e.g., \"two minutes\"\n        r'\\b(?:a|an|the)\\s+' + measures_group\
+    \ + r'\\s+of\\b',  # e.g., \"a drop of water\"\n        r'\\$\\s*\\d[\\d,]*(?:\\\
+    .\\d+)?',                        # currency amounts like $15\n        r'\\b\\\
+    d[\\d,]*(?:\\.\\d+)?\\s*%\\b',                   # percentages\n        r'\\b'\
+    \ + measures_group                                 # standalone measure words\n\
+    \    ]\n\n    compiled = [re.compile(p, re.IGNORECASE) for p in patterns]\n\n\
+    \    spans = []\n\n    # Helper to find sentence-like boundaries around a match\n\
+    \    def sentence_bounds(start_idx, end_idx, max_lookback=500, max_lookahead=1000):\n\
+    \        # Search backward for sentence delimiters within max_lookback\n     \
+    \   lookback_start = max(0, start_idx - max_lookback)\n        pre_region = content[lookback_start:start_idx]\n\
+    \n        # Find last sentence delimiter (., !, ?, or newline)\n        last_delim\
+    \ = -1\n        for delim in ('\\n', '. ', '? ', '! ', '.\\n'):\n            pos\
+    \ = pre_region.rfind(delim)\n            if pos > last_delim:\n              \
+    \  last_delim = pos\n        if last_delim >= 0:\n            context_start =\
+    \ lookback_start + last_delim + (2 if pre_region[last_delim: last_delim+2].strip()\
+    \ else 1)\n            context_start = max(0, context_start)\n        else:\n\
+    \            context_start = max(0, start_idx - 200)  # fallback\n\n        #\
+    \ Search forward for next sentence delimiter within max_lookahead\n        lookahead_end\
+    \ = min(content_len, end_idx + max_lookahead)\n        post_region = content[end_idx:lookahead_end]\n\
+    \        next_delim = None\n        for m in re.finditer(r'[\\.\\n\\?!]', post_region):\n\
+    \            next_delim = m.start()\n            break\n        if next_delim\
+    \ is not None:\n            context_end = end_idx + next_delim + 1\n        else:\n\
+    \            context_end = min(content_len, end_idx + 400)  # fallback\n\n   \
+    \     return context_start, context_end\n\n    # Find matches and compute sentence-based\
+    \ contexts\n    for cre in compiled:\n        for m in cre.finditer(content):\n\
+    \            s, e = m.start(), m.end()\n            cs, ce = sentence_bounds(s,\
+    \ e, max_lookback=800, max_lookahead=1200)\n            spans.append((cs, ce))\n\
+    \n    if not spans:\n        # No deterministic matches: return a short prefix\
+    \ (reduce tokens) but keep enough context\n        return {'content': content[:1500]}\n\
+    \n    # Merge overlapping/nearby spans (merge threshold smaller than prior instantiation\
+    \ to keep concision)\n    spans.sort(key=lambda x: x[0])\n    merged = [spans[0]]\n\
+    \    for s, e in spans[1:]:\n        last_s, last_e = merged[-1]\n        # Merge\
+    \ if overlapping or within 50 characters\n        if s <= last_e + 50:\n     \
+    \       merged[-1] = (last_s, max(last_e, e))\n        else:\n            merged.append((s,\
+    \ e))\n\n    # Extract snippets and deduplicate similar snippets\n    snippets\
+    \ = []\n    seen_texts = set()\n    for s, e in merged:\n        snippet = content[s:e].strip()\n\
+    \        # Reduce multiple whitespace/newlines\n        snippet = re.sub(r'\\\
+    s+\\n', '\\n', snippet)\n        snippet = re.sub(r'\\n{3,}', '\\n\\n', snippet)\n\
+    \        snippet = re.sub(r'[ \\t]{2,}', ' ', snippet)\n        if snippet and\
+    \ snippet not in seen_texts:\n            snippets.append(snippet)\n         \
+    \   seen_texts.add(snippet)\n\n    # Join snippets with compact separator. Also\
+    \ enforce a maximum total length to bound tokens.\n    separator = '\\n\\n---\
+    \ SNIPPET ---\\n\\n'\n    compressed = separator.join(snippets)\n\n    max_chars\
+    \ = 9000\n    if len(compressed) > max_chars:\n        # Trim to most important\
+    \ snippets until under the limit\n        result_parts = []\n        total = 0\n\
+    \        for part in snippets:\n            part_len = len(part)\n           \
+    \ if total + part_len + len(separator) > max_chars:\n                break\n \
+    \           result_parts.append(part)\n            total += part_len + len(separator)\n\
+    \        compressed = separator.join(result_parts) if result_parts else snippets[0][:max_chars]\n\
+    \n    return {'content': compressed}"
+- name: extract_measure_words
+  type: map
+  output:
+    schema:
+      measure_words: list[str]
+  prompt: "Extract every measure word (unit word or collective/count noun used as\
+    \ a unit) that appears in the text: {{ input.content }}. Do not return plain numeric\
+    \ tokens (\"one\", \"2\", \"100\") � return the unit/measure words themselves.\
+    \ Follow these precise rules so results are consistent across transcripts and\
+    \ compressed snippets:\n\n1) What to include (examples and patterns):\n   - Units\
+    \ of time, weight, length, volume, money, percentage, and other measurement units\
+    \ when they appear with or without numbers. Examples: \"minute(s)\", \"hour(s)\"\
+    , \"kg\", \"pound(s)\", \"meter(s)\", \"mile(s)\", \"inch(es)\", \"ounce(s)\"\
+    , \"cup(s)\", \"bottle(s)\", \"gallon(s)\", \"percent\", \"%\".\n   - Collective/count\
+    \ measure words and quantized nouns that act as a unit: \"dozen\", \"pair\", \"\
+    bunch\", \"flock\", \"handful\", \"slice\", \"drop\", \"couple\" (when used like\
+    \ \"a couple of X\"), \"unit(s)\", \"people\" (when used as the unit in a numeric\
+    \ context, e.g., \"100 people\").\n   - Currency tokens: symbols or words (\"\
+    $100\", \"USD\", \"dollars\").\n   - Compound multi-word units (preserve the unit\
+    \ phrase), e.g., \"miles per hour\", \"per day\" when used as a unit after a number.\n\
+    \n2) What to exclude:\n   - Plain numeric words or digits by themselves (\"two\"\
+    , \"100\"); only extract the unit word.\n   - Vague quantifiers that are not units\
+    \ (do NOT extract: \"many\", \"several\", \"some\", \"a lot\") unless they are\
+    \ part of a named quantifier in the include list above (e.g., \"a couple\", \"\
+    a handful\").\n   - Speaker labels, timestamps, section headings, URLs, email\
+    \ addresses, or transcript artifacts.\n   - Words that only appear as part of\
+    \ a proper name or title (e.g., \"State of the Union\") when they are not acting\
+    \ as measurement units.\n\n3) Normalization rules (the string values you should\
+    \ return):\n   - Lowercase every returned token.\n   - Convert plurals to singular\
+    \ canonical form where obvious: \"minutes\" -> \"minute\", \"dollars\" -> \"dollar\"\
+    , \"feet\" -> \"foot\".\n   - Expand common abbreviations to canonical unit words:\
+    \ \"kg\" or \"kgs\" -> \"kilogram\", \"lb\"/\"lbs\" -> \"pound\", \"oz\" -> \"\
+    ounce\", \"cm\" -> \"centimeter\", \"mm\" -> \"millimeter\", \"%\" -> \"percent\"\
+    , \"$\" -> \"dollar\" (or \"usd\" if you prefer currency code; use \"dollar\"\
+    \ for $ symbol unless currency code is explicit).\n   - For compact forms joined\
+    \ to numbers (\"5kg\", \"30%\", \"$100\"), extract the canonical unit as above\
+    \ (\"kilogram\", \"percent\", \"dollar\").\n   - For hyphenated or prefixed forms\
+    \ (\"half-dozen\", \"pre-war dozen\"), extract the base unit (\"dozen\"). For\
+    \ ranges (\"5-10 miles\"), extract the unit once (\"mile\").\n   - For multi-word\
+    \ units preserve the phrase but normalize words individually (\"miles per hour\"\
+    \ -> \"mile per hour\").\n\n4) Disambiguation rules:\n   - If a candidate word\
+    \ appears both as a plain noun and as a unit, only extract it if it is used in\
+    \ a measurable context (usually adjacent to a number, numeric word, or a prepositional\
+    \ phrase like \"a X of\" where X is a collective unit: \"a flock of geese\").\n\
+    \   - When in doubt, prefer including the token (the pipeline downstream uses\
+    \ these to compute coverage), but avoid including vague non-units.\n\n5) Output\
+    \ requirements:\n   - Return a JSON array (list) of strings named measure_words.\n\
+    \   - Each entry must be the normalized canonical unit (see normalization rules).\n\
+    \   - Preserve the order of first occurrence in the text and do not include duplicates.\n\
+    \   - Keep entries short � single words or short unit phrases (e.g., \"mile per\
+    \ hour\").\n\n6) Examples (input fragment -> expected extracted list):\n   - \"\
+    two minutes\" -> [\"minute\"]\n   - \"a drop of water\" -> [\"drop\"]\n   - \"\
+    $100\" or \"100 dollars\" -> [\"dollar\"]\n   - \"30%\" or \"30 percent\" -> [\"\
+    percent\"]\n   - \"5kg\" or \"5 kg\" -> [\"kilogram\"]\n   - \"a flock of geese\"\
+    \ -> [\"flock\"]\n   - \"half-dozen eggs\" -> [\"dozen\"]\n   - \"miles per hour\"\
+    \ after a number -> [\"mile per hour\"]\n\nApply these rules to the entire string\
+    \ in {{ input.content }} and return only the array measure_words (list[str]) containing\
+    \ the normalized, lowercased, deduplicated measure words in order of first appearance."
+pipeline:
+  steps:
+  - name: extract_measure_words
+    input: transcripts
+    operations:
+    - compress_measure_sentences_context
+    - extract_measure_words
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results2\pipeline_reproduce2_openai_4-1-acc.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results2
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_measures.py
+  metric_key: measure_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

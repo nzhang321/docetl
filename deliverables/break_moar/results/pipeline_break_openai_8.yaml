@@ -1,0 +1,70 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: summarize_for_place_extraction
+  type: map
+  prompt: 'You are given a long transcript. Produce a concise, token-efficient summarized
+    version that preserves EVERY mention of place names exactly as they appear in
+    the original. For each mention of a place (cities, states, countries, regions,
+    landmarks, neighborhoods, or other geographic references) include: (1) the exact
+    place name text verbatim, (2) the speaker who said it if present (e.g., ''TAPPER:'',
+    ''BIDEN:''), and (3) the minimal surrounding sentence or phrase (no more than
+    ~30 words) that shows the mention in context. Maintain the original order and
+    include repeated occurrences (do not deduplicate). Remove unrelated procedural
+    text, stage directions, long filler passages, and content that does not contain
+    place names to reduce token usage. At the end of the summarized text, append a
+    section titled ''PLACE_NAMES_INDEX'' that lists each unique place name and the
+    number of times it appears. Output only the summarized content followed by the
+    index. Original transcript:
+
+
+    {{ input.content }}'
+  model: openai/gpt-5-mini
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      content: string
+- name: extract_place_names
+  type: map
+  output:
+    schema:
+      place_names: list[str]
+  prompt: 'Extract all instances in: {{ input.content }} where the speaker mentions
+    a place name.
+
+    '
+pipeline:
+  steps:
+  - name: extract_place_names
+    input: transcripts
+    operations:
+    - summarize_for_place_extraction
+    - extract_place_names
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results\pipeline_break_openai_8.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_place_names.py
+  metric_key: place_name_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

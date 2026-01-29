@@ -1,0 +1,64 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: summarize_for_filler_extraction
+  type: map
+  prompt: 'Create a concise, machine-readable version of the following transcript
+    that preserves every exact occurrence of filler words or filler phrases (e.g.,
+    "um", "uh", "you know", "I mean", "like", "so", "and so", "well", "frankly", "let
+    me", "by the way", etc.). For every occurrence of a filler word/phrase: include
+    the speaker if present, keep the filler text verbatim (do not normalize or paraphrase),
+    and include up to 7 words of the original surrounding context on each side of
+    the filler occurrence. Preserve the original order of occurrences. Remove any
+    parts of the transcript that contain no filler words. Do not add commentary, summaries,
+    or new words; return only the condensed transcript lines (one per occurrence or
+    per sentence fragment) that contain filler words. Transcript: {{ input.content
+    }}'
+  model: openai/gpt-5-nano
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      content: string
+- name: extract_filler
+  type: map
+  output:
+    schema:
+      filler_words: list[str]
+  prompt: 'Extract all instances of filler words spoken in: {{ input.content }}
+
+    '
+pipeline:
+  steps:
+  - name: extract_fillers
+    input: transcripts
+    operations:
+    - summarize_for_filler_extraction
+    - extract_filler
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results1\pipeline_reproduce1_openai_7.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results1
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_fillers.py
+  metric_key: filler_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

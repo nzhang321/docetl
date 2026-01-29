@@ -1,0 +1,32 @@
+[
+  {
+    "node_id": 11,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results1\\pipeline_break_openai_11.yaml",
+    "cost": 0.0007126499999999999,
+    "accuracy": 0
+  },
+  {
+    "node_id": 4,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results1\\pipeline_break_openai_2-2-cost.yaml",
+    "cost": 0.0032990999999999997,
+    "accuracy": 11
+  },
+  {
+    "node_id": 7,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results1\\pipeline_break_openai_2-1-cost.yaml",
+    "cost": 0.00343993,
+    "accuracy": 17
+  },
+  {
+    "node_id": 12,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results1\\pipeline_break_openai_12.yaml",
+    "cost": 0.00426705,
+    "accuracy": 30
+  },
+  {
+    "node_id": 6,
+    "yaml_path": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results1\\pipeline_break_openai_6.yaml",
+    "cost": 0.01668005,
+    "accuracy": 32
+  }
+]

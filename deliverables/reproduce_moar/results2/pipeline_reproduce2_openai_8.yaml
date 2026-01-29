@@ -1,0 +1,133 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: split_extract_measure_words
+  type: split
+  split_key: content
+  method: token_count
+  method_kwargs:
+    num_tokens: 12000
+    model: openai/gpt-5-nano
+- name: topk_extract_measure_words_chunks
+  type: topk
+  method: fts
+  k: 5
+  keys:
+  - content_chunk
+  query: measure unit words minute minutes second seconds hour hours day days week
+    weeks month months year years percent % people jobs units dollars $ drop flock
+    pound pounds ton tons ounce ounces kilogram kilograms
+  stratify_key:
+  - split_extract_measure_words_id
+- name: reduce_extract_measure_words
+  type: reduce
+  reduce_key: split_extract_measure_words_id
+  prompt: 'Extract all instances in: the top {{ inputs|length }} most relevant chunks
+    from the document (ordered by relevance):
+
+    {% for input in inputs|sort(attribute=''_topk_extract_measure_words_chunks_rank'')
+    %}
+
+    Chunk (Rank {{ input._topk_extract_measure_words_chunks_rank }}, Score {{ input._topk_extract_measure_words_chunks_score
+    }}):
+
+    {{ input.content_chunk }}
+
+    {% endfor %}
+
+    where the speaker uses a measure word. These are not numerical words but words
+    specifying a unit such as "drop" in the phrase "a drop of water" or "flock" in
+    "a flock of geese".
+
+    '
+  model: openai/gpt-5-nano
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      measure_words: list[str]
+  associative: false
+  pass_through: true
+  gleaning:
+    validation_prompt: 'You are a validation agent. You will be given two items: (1)
+      the reduce output named "measure_words" (a list of strings), and (2) the input
+      chunks that were used to generate that output. Evaluate the reduce output against
+      these criteria:
+
+
+      - Completeness: Every relevant measure word or unit expression present in the
+      provided chunks should be included in the list.
+
+      - Accuracy: Each list item must be a measure-related term (a unit, unit phrase,
+      quantity expression, or collective noun used as a unit, e.g., "a drop", "flock",
+      "pound", "two minutes"). Exclude purely numeric tokens without units (e.g.,
+      "15" alone) and unrelated words.
+
+      - Structure: The output must be a JSON array of strings matching the schema
+      (list of strings).
+
+      - Comprehensiveness: Include contextual unit phrases as they appear in the text
+      (e.g., "basket of groceries", "2 million") when they serve as measures in context.
+
+      - Consistency: Remove duplicates, avoid including near-duplicate variants unless
+      meaningfully different, and present a consistent, clean list.
+
+
+      If the reduce output satisfies all criteria, respond exactly with:
+
+
+      PASS
+
+      <one-sentence justification>
+
+
+      If it fails any criteria, respond exactly with:
+
+
+      FAIL
+
+      <brief explanation of the failures>
+
+      Corrected measure_words: <JSON array of strings>
+
+
+      The corrected measure_words array should remove non-measure items, deduplicate,
+      and add any missing measure words that appear in the provided chunks. Do not
+      include any other text.'
+    num_rounds: 3
+    model: openai/gpt-5-nano
+pipeline:
+  steps:
+  - name: extract_measure_words
+    input: transcripts
+    operations:
+    - split_extract_measure_words
+    - topk_extract_measure_words_chunks
+    - reduce_extract_measure_words
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results2\pipeline_reproduce2_openai_8.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results2
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_measures.py
+  metric_key: measure_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

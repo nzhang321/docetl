@@ -1,0 +1,114 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: identify_candidate_place_mentions
+  type: map
+  prompt: 'Scan the following transcript content and identify every span where a speaker
+    mentions a place name.
+
+
+    Transcript content:
+
+    {{ input.content }}
+
+
+    Definition: A "place name" includes cities, states, countries, regions, neighborhoods,
+    landmarks, and named facilities (for example: "Georgia", "Atlanta", "Scranton,
+    Pennsylvania", "Paris", "Washington, D.C.").
+
+
+    For each mention you find, return a candidate object with the following fields:
+
+    - text: the exact text of the mention (verbatim from the transcript)
+
+    - sentence: the full sentence from the transcript that contains the mention
+
+    - char_start: the character index where the mention starts in {{ input.content
+    }}
+
+    - char_end: the character index where the mention ends in {{ input.content }}
+
+
+    Return a JSON array of these candidate objects and nothing else.'
+  model: openai/gpt-5-nano
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      candidates: string
+- name: verify_and_canonicalize_place_names
+  type: map
+  prompt: 'Using the original transcript and the candidate mentions produced earlier,
+    determine which candidates are true place names and canonicalize them.
+
+
+    Transcript content:
+
+    {{ input.content }}
+
+
+    Candidate mentions:
+
+    {{ input.candidates }}
+
+
+    Instructions:
+
+    1. For each candidate in {{ input.candidates }}, decide whether it is indeed a
+    place name mentioned by a speaker in the transcript. Discard false positives (e.g.,
+    organization names, person names, ambiguous common nouns) unless they clearly
+    refer to a place in context.
+
+    2. For candidates that are true place names, normalize each to a canonical readable
+    form (e.g., expand abbreviations where helpful, prefer standard city/state/country
+    formatting like "Scranton, Pennsylvania" or "Washington, D.C.").
+
+    3. Deduplicate equivalent mentions (e.g., "U.S.", "United States", and "United
+    States of America" should produce a single canonical entry).
+
+    4. Preserve only place names that originate from {{ input.content }} (do not introduce
+    any new places).
+
+
+    Return a deduplicated JSON array of canonical place names as plain strings. This
+    array will be used as the final place_names output.'
+  model: openai/gpt-5-nano
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      place_names: list[str]
+pipeline:
+  steps:
+  - name: extract_place_names
+    input: transcripts
+    operations:
+    - identify_candidate_place_mentions
+    - verify_and_canonicalize_place_names
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results\pipeline_break_openai_12.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_place_names.py
+  metric_key: place_name_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

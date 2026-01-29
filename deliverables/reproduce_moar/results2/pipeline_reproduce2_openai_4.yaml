@@ -1,0 +1,86 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: summarize_preserve_measures
+  type: map
+  prompt: 'Produce a concise, compressed version of the following document that preserves
+    EVERY occurrence of a measure word or quantitative expression. Measure words include
+    numerals or spelled-out numbers and units such as percent, % , dollars, $, million,
+    billion, thousand, months, weeks, days, hours, minutes, seconds, years, pounds,
+    kg, meters, miles, degrees (C/F), times, ratios, fractions, counts, ordinal references
+    (first, second), and similar quantitative phrases.
+
+
+    For each occurrence you must:
+
+    - Include the exact verbatim text substring from the original that contains the
+    measure (do not normalize or change formatting).
+
+    - Include the speaker attribution (if present in the original transcript) immediately
+    before the snippet (e.g., "President Biden � ...") or indicate the speaker in
+    parentheses if clear.
+
+    - Include up to 10 words of original surrounding context before and after the
+    verbatim snippet to preserve disambiguating context.
+
+    - Preserve the original order of occurrences.
+
+
+    Omit portions of the document that contain no measure words. Do NOT add summaries,
+    interpretations, or new information�only return the selected verbatim snippets
+    with speaker attribution and the short surrounding context, each on its own line.
+    If there are no measure words, output the single line: NO_MEASURE_WORDS_FOUND
+
+
+    Document:
+
+    {{ input.content }}'
+  model: openai/gpt-5-nano
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      content: string
+- name: extract_measure_words
+  type: map
+  output:
+    schema:
+      filler_words: list[str]
+  prompt: 'Extract all instances in: {{ input.content }} where the speaker uses a
+    measure word.
+
+    '
+pipeline:
+  steps:
+  - name: extract_measure_words
+    input: transcripts
+    operations:
+    - summarize_preserve_measures
+    - extract_measure_words
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results2\pipeline_reproduce2_openai_4.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results2
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_fillers.py
+  metric_key: filler_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

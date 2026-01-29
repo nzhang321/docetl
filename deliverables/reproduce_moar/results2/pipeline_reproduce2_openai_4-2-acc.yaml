@@ -1,0 +1,88 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: compress_measure_sentences_context
+  type: code_map
+  code: "def transform(input_doc):\n    import re\n    import html\n\n    content\
+    \ = input_doc.get('content', '')\n    if not content:\n        return {'content':\
+    \ ''}\n\n    # Normalize HTML entities\n    content = html.unescape(content)\n\
+    \    content_len = len(content)\n\n    # Focused list of measure words / unit\
+    \ indicators (smaller set than other instantiations)\n    measures = [\n     \
+    \   'drop', 'flock', 'pair', 'dozen', 'handful', 'slice', 'bunch', 'cup', 'glass',\n\
+    \        'bottle', 'pint', 'quart', 'gallon', 'ounce', 'pound', 'kg', 'lb', 'meter',\n\
+    \        'mile', 'inch', 'minute', 'second', 'hour', 'day', 'week', 'month', 'year',\n\
+    \        'percent', '%', 'people', 'jobs', 'units', 'bomb', 'insulin', 'unit',\
+    \ 'unit(s)'\n    ]\n\n    # Build regexes emphasizing sentence-level matches and\
+    \ numeric/currency contexts\n    # 1) number (digits or common word numbers) +\
+    \ measure\n    number_words = r'(?:a|an|one|two|three|four|five|six|seven|eight|nine|ten)'\n\
+    \    number_pattern = r'(?:\\b' + number_words + r'\\b|\\b\\d[\\d,\\.]*\\b)'\n\
+    \n    measures_group = r'(?:' + '|'.join(re.escape(m) for m in measures) + r')\\\
+    b'\n\n    patterns = [\n        number_pattern + r'\\s+' + measures_group,   \
+    \           # e.g., \"two minutes\"\n        r'\\b(?:a|an|the)\\s+' + measures_group\
+    \ + r'\\s+of\\b',  # e.g., \"a drop of water\"\n        r'\\$\\s*\\d[\\d,]*(?:\\\
+    .\\d+)?',                        # currency amounts like $15\n        r'\\b\\\
+    d[\\d,]*(?:\\.\\d+)?\\s*%\\b',                   # percentages\n        r'\\b'\
+    \ + measures_group                                 # standalone measure words\n\
+    \    ]\n\n    compiled = [re.compile(p, re.IGNORECASE) for p in patterns]\n\n\
+    \    spans = []\n\n    # Helper to find sentence-like boundaries around a match\n\
+    \    def sentence_bounds(start_idx, end_idx, max_lookback=500, max_lookahead=1000):\n\
+    \        # Search backward for sentence delimiters within max_lookback\n     \
+    \   lookback_start = max(0, start_idx - max_lookback)\n        pre_region = content[lookback_start:start_idx]\n\
+    \n        # Find last sentence delimiter (., !, ?, or newline)\n        last_delim\
+    \ = -1\n        for delim in ('\\n', '. ', '? ', '! ', '.\\n'):\n            pos\
+    \ = pre_region.rfind(delim)\n            if pos > last_delim:\n              \
+    \  last_delim = pos\n        if last_delim >= 0:\n            context_start =\
+    \ lookback_start + last_delim + (2 if pre_region[last_delim: last_delim+2].strip()\
+    \ else 1)\n            context_start = max(0, context_start)\n        else:\n\
+    \            context_start = max(0, start_idx - 200)  # fallback\n\n        #\
+    \ Search forward for next sentence delimiter within max_lookahead\n        lookahead_end\
+    \ = min(content_len, end_idx + max_lookahead)\n        post_region = content[end_idx:lookahead_end]\n\
+    \        next_delim = None\n        for m in re.finditer(r'[\\.\\n\\?!]', post_region):\n\
+    \            next_delim = m.start()\n            break\n        if next_delim\
+    \ is not None:\n            context_end = end_idx + next_delim + 1\n        else:\n\
+    \            context_end = min(content_len, end_idx + 400)  # fallback\n\n   \
+    \     return context_start, context_end\n\n    # Find matches and compute sentence-based\
+    \ contexts\n    for cre in compiled:\n        for m in cre.finditer(content):\n\
+    \            s, e = m.start(), m.end()\n            cs, ce = sentence_bounds(s,\
+    \ e, max_lookback=800, max_lookahead=1200)\n            spans.append((cs, ce))\n\
+    \n    if not spans:\n        # No deterministic matches: return a short prefix\
+    \ (reduce tokens) but keep enough context\n        return {'content': content[:1500]}\n\
+    \n    # Merge overlapping/nearby spans (merge threshold smaller than prior instantiation\
+    \ to keep concision)\n    spans.sort(key=lambda x: x[0])\n    merged = [spans[0]]\n\
+    \    for s, e in spans[1:]:\n        last_s, last_e = merged[-1]\n        # Merge\
+    \ if overlapping or within 50 characters\n        if s <= last_e + 50:\n     \
+    \       merged[-1] = (last_s, max(last_e, e))\n        else:\n            merged.append((s,\
+    \ e))\n\n    # Extract snippets and deduplicate similar snippets\n    snippets\
+    \ = []\n    seen_texts = set()\n    for s, e in merged:\n        snippet = content[s:e].strip()\n\
+    \        # Reduce multiple whitespace/newlines\n        snippet = re.sub(r'\\\
+    s+\\n', '\\n', snippet)\n        snippet = re.sub(r'\\n{3,}', '\\n\\n', snippet)\n\
+    \        snippet = re.sub(r'[ \\t]{2,}', ' ', snippet)\n        if snippet and\
+    \ snippet not in seen_texts:\n            snippets.append(snippet)\n         \
+    \   seen_texts.add(snippet)\n\n    # Join snippets with compact separator. Also\
+    \ enforce a maximum total length to bound tokens.\n    separator = '\\n\\n---\
+    \ SNIPPET ---\\n\\n'\n    compressed = separator.join(snippets)\n\n    max_chars\
+    \ = 9000\n    if len(compressed) > max_chars:\n        # Trim to most important\
+    \ snippets until under the limit\n        result_parts = []\n        total = 0\n\
+    \        for part in snippets:\n            part_len = len(part)\n           \
+    \ if total + part_len + len(separator) > max_chars:\n                break\n \
+    \           result_parts.append(part)\n            total += part_len + len(separator)\n\
+    \        compressed = separator.join(result_parts) if result_parts else snippets[0][:max_chars]\n\
+    \n    return {'content': compressed}"
+- name: extract_measure_words
+  type: map
+  output:
+    schema:
+      measure_words: list[str]
+  prompt: "Extract all measure words from the text: {{ input.content }}. A \"measure\
+    \ word\" for this task is any noun or fixed expression that names a unit, container,\
+    \ collective group, or quantity type used to count/measure things (not the numeric\
+    \ value itself). Include these categories: collective nouns (e.g., flock, herd,\
+    \ crowd), container/count nouns used as units (e.g., drop, bottle, cup, basket,\
+    \ slice, bunch, pair, dozen, handful), standard units of measure (e.g., meter,\
+    \ mile, inch, ounce, pound, kg, lb), time units (e.g., second, minute, hour, day,\
+    \ week, month, year), monetary units (e.g., dollar, euro) and percent/percentage\
+    \

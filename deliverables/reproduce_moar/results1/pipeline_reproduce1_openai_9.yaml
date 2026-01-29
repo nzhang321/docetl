@@ -1,0 +1,99 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: extract_filler_parallel
+  type: parallel_map
+  litellm_completion_kwargs:
+    temperature: 0
+  prompts:
+  - name: identify_fillers
+    output_keys:
+    - subtask_1_output
+    prompt: 'From the document below, identify every span of spoken text that is a
+      filler word or filler phrase (e.g., "um", "uh", "like", "you know", "I mean",
+      etc.). Return the findings as a list of matches with short context for each
+      match.
+
+
+      Document: {{ input.document }}'
+  - name: count_and_normalize_fillers
+    output_keys:
+    - subtask_2_output
+    prompt: 'Count occurrences of common filler words and phrases in the document
+      and normalize variants (e.g., "uhh" -> "uh"). Return a compact summary showing
+      each normalized filler and its count.
+
+
+      Document: {{ input.document }}'
+  - name: example_contexts
+    output_keys:
+    - subtask_3_output
+    prompt: 'For up to five representative filler occurrences, return the sentence
+      or short phrase (10-30 words) surrounding the filler so downstream steps can
+      inspect usage patterns.
+
+
+      Document: {{ input.document }}'
+  code: "def transform(input_doc):\n    import re\n    text = input_doc.get('content',\
+    \ '') or ''\n    # normalize and lowercase to improve matching\n    normalized\
+    \ = ' '.join(text.lower().split())\n    # common filler words and phrases to detect\n\
+    \    fillers = ['um','uh','like','you know','i mean','so','actually','basically','right','well','hmm','huh']\n\
+    \    # match whole words/phrases using word boundaries\n    pattern = r'\\b(?:um|uh|like|you\
+    \ know|i mean|so|actually|basically|right|well|hmm|huh)\\b'\n    matches = re.findall(pattern,\
+    \ normalized)\n    # return deterministic, low-cost structured outputs for downstream\
+    \ use\n    return {\n        'filler_words': matches,\n        'filler_counts':\
+    \ {w: matches.count(w) for w in set(matches)}\n    }\n"
+  output:
+    schema:
+      subtask_1_output: string
+      subtask_2_output: string
+      subtask_3_output: string
+  model: openai/gpt-5-nano
+- name: extract_filler_aggregate
+  type: map
+  prompt: 'Combine the isolated subtask outputs into the final result format required
+    by the original operation. Subtask 1 results: {{ input.subtask_1_output }}. Subtask
+    2 results: {{ input.subtask_2_output }}. Subtask 3 results: {{ input.subtask_3_output
+    }}.
+
+
+    The original operation''s output schema contains no fields; therefore produce
+    an empty object {} as the final output (do not add new keys).'
+  litellm_completion_kwargs:
+    temperature: 0
+  output: {}
+  model: openai/gpt-5-nano
+pipeline:
+  steps:
+  - name: extract_fillers
+    input: transcripts
+    operations:
+    - extract_filler_parallel
+    - extract_filler_aggregate
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results1\pipeline_reproduce1_openai_9.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results1
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_fillers.py
+  metric_key: filler_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

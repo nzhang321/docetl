@@ -1,0 +1,82 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: compress_content_by_filler_spans
+  type: code_map
+  code: "def transform(input_doc):\n    import re\n\n    # Read the original content\
+    \ field\n    content = input_doc.get('content', '') or ''\n\n    # Define common\
+    \ filler words/phrases to look for (case-insensitive)\n    filler_terms = [\n\
+    \        r'uh', r'um', r'you\\s+know', r'i\\s+mean', r\"i'm\\s+like\", r'like',\
+    \ r'so', r'well',\n        r'you\\s+see', r'sort\\s+of', r'kind\\s+of', r'right',\
+    \ r'okay', r'ok', r'and\\s+so',\n        r'by\\s+the\\s+way', r'look', r'frankly',\
+    \ r'let\\s+me', r'erm', r'hmm'\n    ]\n\n    # Combine into a single regex pattern\
+    \ using word boundaries to reduce false positives\n    pattern = re.compile(r\"\
+    \\b(?:\" + r\"|\".join(filler_terms) + r\")\\b\", flags=re.IGNORECASE)\n\n   \
+    \ relevant_spans = []\n\n    # For each match, capture a bit of surrounding context\n\
+    \    # Choose context sizes that are big enough to include the sentence or clause\
+    \ around the filler\n    # but small enough to drastically reduce token usage\
+    \ from very long transcripts.\n    context_before = 100   # chars before match\n\
+    \    context_after = 200    # chars after match\n\n    for m in pattern.finditer(content):\n\
+    \        start = max(0, m.start() - context_before)\n        end = min(len(content),\
+    \ m.end() + context_after)\n        relevant_spans.append((start, end))\n\n  \
+    \  # If no deterministic matches found, return a short excerpt (to limit tokens)\
+    \ rather than the full document\n    if not relevant_spans:\n        # Provide\
+    \ a modest fallback excerpt (first 2000 chars) so downstream LLM still has context\n\
+    \        excerpt_length = 2000\n        compressed = content[:excerpt_length]\n\
+    \        if len(content) > excerpt_length:\n            compressed += \"\\n\\\
+    n--- TRUNCATED ---\\n\\n\"\n        return {'content': compressed}\n\n    # Merge\
+    \ overlapping or closely adjacent spans to avoid duplication\n    relevant_spans.sort(key=lambda\
+    \ s: s[0])\n    merged = [relevant_spans[0]]\n    merge_gap_threshold = 50  #\
+    \ if spans are within 50 chars, merge them\n\n    for cur_start, cur_end in relevant_spans[1:]:\n\
+    \        last_start, last_end = merged[-1]\n        if cur_start <= last_end +\
+    \ merge_gap_threshold:\n            # extend the last span\n            new_end\
+    \ = max(last_end, cur_end)\n            merged[-1] = (last_start, new_end)\n \
+    \       else:\n            merged.append((cur_start, cur_end))\n\n    # Extract\
+    \ merged text spans and join them with clear separators\n    parts = []\n    for\
+    \ idx, (s, e) in enumerate(merged, start=1):\n        span_text = content[s:e].strip()\n\
+    \        # Add a small header to keep segments identifiable if needed downstream\n\
+    \        parts.append(f\"--- COMPRESSED SEGMENT {idx} ({s}-{e}) ---\\n\" + span_text)\n\
+    \n    compressed_text = \"\\n\\n\".join(parts)\n\n    return {\n        'content':\
+    \ compressed_text\n    }\n"
+- name: extract_filler
+  type: map
+  output:
+    schema:
+      filler_words: list[str]
+  prompt: 'Extract all instances of filler words spoken in: {{ input.content }}
+
+    '
+pipeline:
+  steps:
+  - name: extract_fillers
+    input: transcripts
+    operations:
+    - compress_content_by_filler_spans
+    - extract_filler
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results1\pipeline_reproduce1_openai_5.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results1
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_fillers.py
+  metric_key: filler_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

@@ -1,0 +1,101 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: compress_measure_word_spans
+  type: code_map
+  code: "def transform(input_doc):\n    import re\n    import html\n\n    # Preserve\
+    \ the original field name exactly as in the input schema\n    content = input_doc.get('content',\
+    \ '')\n\n    # If empty, return as-is\n    if not content:\n        return {'content':\
+    \ ''}\n\n    # Normalize common HTML entities to plain text for more robust matching\n\
+    \    content = html.unescape(content)\n\n    # Candidate measure/unit words and\
+    \ common lexical patterns that indicate measures\n    measure_terms = [\n    \
+    \    r'drop', r'flock', r'pair', r'dozen', r'handful', r'slice', r'pack', r'bunch',\n\
+    \        r'cup', r'glass', r'bottle', r'pint', r'quart', r'gallon', r'ounce',\
+    \ r'ounces',\n        r'pound', r'pounds', r'lb', r'lbs', r'kg', r'kilogram',\
+    \ r'kilograms', r'ton',\n        r'meter', r'metre', r'meters', r'metres', r'foot',\
+    \ r'feet', r'inch', r'inches',\n        r'minute', r'minutes', r'second', r'seconds',\
+    \ r'hour', r'hours', r'day', r'days',\n        r'week', r'weeks', r'month', r'months',\
+    \ r'year', r'years', r'percent', r'%',\n        r'people', r'americans', r'jobs',\
+    \ r'units', r'bombs', r'bomb', r'patients', r'insulin'\n    ]\n\n    # Build regex\
+    \ patterns to find occurrences where these terms are used as measures\n    # 1)\
+    \ Numeric or word-number + measure (e.g., \"two minutes\", \"15,000 jobs\")\n\
+    \    number_prefix = r'(?:\\b(?:a|an|one|two|three|four|five|six|seven|eight|nine|ten|\\\
+    d[\\d,\\.]*|\\d+)\\b)'\n    measure_group = r'(?:' + r'|'.join(measure_terms)\
+    \ + r')\\b'\n    patterns = []\n\n    # numeric/word number followed by measure\
+    \ word\n    patterns.append(number_prefix + r'\\s+' + measure_group)\n\n    #\
+    \ indefinite article + measure + of + noun (e.g., \"a drop of water\", \"a flock\
+    \ of geese\")\n    patterns.append(r'\\b(?:a|an|the)\\s+' + measure_group + r'\\\
+    s+of\\b')\n\n    # measure word followed by \"of\" or measure used as a unit (standalone)\n\
+    \    patterns.append(r'\\b' + measure_group + r'\\s+of\\b')\n    patterns.append(r'\\\
+    b' + measure_group)\n\n    # currency/percent patterns often accompany measures\
+    \ (e.g., \"$15\", \"30%\")\n    patterns.append(r'\\$\\s*\\d[\\d,]*(?:\\.\\d+)?')\n\
+    \    patterns.append(r'\\b\\d[\\d,]*(?:\\.\\d+)?\\s*%')\n\n    # Compile patterns\
+    \ for case-insensitive search\n    compiled = [re.compile(p, re.IGNORECASE) for\
+    \ p in patterns]\n\n    relevant_spans = []\n    content_len = len(content)\n\n\
+    \    # For each pattern, find matches and extract context around them\n    for\
+    \ cre in compiled:\n        for m in cre.finditer(content):\n            start_pos\
+    \ = m.start()\n            end_pos = m.end()\n\n            # Extract context:\
+    \ 300 chars before, 500 chars after (captures sentence-level context)\n      \
+    \      context_start = max(0, start_pos - 300)\n            context_end = min(content_len,\
+    \ end_pos + 500)\n\n            relevant_spans.append((context_start, context_end))\n\
+    \n    # If nothing matched, fallback to a short leading excerpt to still reduce\
+    \ tokens\n    if not relevant_spans:\n        # Return the first 2000 characters\
+    \ as a compact fallback\n        fallback = content[:2000]\n        return {'content':\
+    \ fallback}\n\n    # Merge overlapping/nearby spans to avoid duplication\n   \
+    \ relevant_spans.sort(key=lambda x: x[0])\n    merged = [relevant_spans[0]]\n\
+    \    for s, e in relevant_spans[1:]:\n        last_s, last_e = merged[-1]\n  \
+    \      # Merge if spans overlap or are within 100 chars of each other\n      \
+    \  if s <= last_e + 100:\n            new_end = max(last_e, e)\n            merged[-1]\
+    \ = (last_s, new_end)\n        else:\n            merged.append((s, e))\n\n  \
+    \  # Extract the text for each merged span and clean up leading/trailing whitespace\n\
+    \    span_texts = []\n    for s, e in merged:\n        snippet = content[s:e].strip()\n\
+    \        # Normalize excessive whitespace and preserve paragraph breaks\n    \
+    \    snippet = re.sub(r'\\s+\\n', '\\n', snippet)\n        snippet = re.sub(r'\\\
+    n{3,}', '\\n\\n', snippet)\n        span_texts.append(snippet)\n\n    # Join with\
+    \ clear separators to preserve boundaries for downstream LLM map\n    compressed_text\
+    \ = '\\n\\n--- MEASURE-SPAN BREAK ---\\n\\n'.join(span_texts)\n\n    return {'content':\
+    \ compressed_text}"
+- name: extract_measure_words
+  type: map
+  output:
+    schema:
+      measure_words: list[str]
+  prompt: 'Extract all instances in: {{ input.content }} where the speaker uses a
+    measure word. These are not numerical words but words specifying a unit such as
+    "drop" in the phrase "a drop of water" or "flock" in "a flock of geese".
+
+    '
+pipeline:
+  steps:
+  - name: extract_measure_words
+    input: transcripts
+    operations:
+    - compress_measure_word_spans
+    - extract_measure_words
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results2\pipeline_reproduce2_openai_2-1-cost.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results2
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_measures.py
+  metric_key: measure_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

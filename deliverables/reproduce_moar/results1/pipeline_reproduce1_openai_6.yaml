@@ -1,0 +1,108 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: build_filler_lexicon
+  type: map
+  prompt: 'Analyze the following transcript content and produce a comprehensive list
+    of filler words and phrases that appear in it.
+
+
+    Transcript content:
+
+    {{ input.content }}
+
+
+    Definition: For this task, a "filler word/phrase" is a brief utterance or interjection
+    speakers use to fill pauses or hold the floor (examples include: "um", "uh", "you
+    know", "like", "I mean", "well", "so", "and so", "by the way", "frankly", "let
+    me", "look", "okay", "right").
+
+
+    Instructions:
+
+    - Scan the transcript and identify every distinct filler word or multi-word filler
+    phrase that appears (include contractions and variants).
+
+    - Normalize variants only for grouping (e.g., "you know" and "ya know" may be
+    listed separately if both appear), but return the exact canonical filler strings
+    you want to match in the next step.
+
+    - Return a JSON list of distinct filler words/phrases (strings) under the key
+    filler_lexicon.
+
+    '
+  model: openai/gpt-5-nano
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      filler_lexicon: string
+- name: extract_filler_instances
+  type: map
+  prompt: 'Using the filler lexicon produced earlier and the original transcript,
+    extract all instances of those filler words/phrases as they appear in the text.
+
+
+    Filler lexicon: {{ input.filler_lexicon }}
+
+
+    Transcript content:
+
+    {{ input.content }}
+
+
+    Instructions:
+
+    - For each occurrence in the transcript of any filler word or phrase in the provided
+    filler_lexicon, extract the exact text as it appears (preserve original punctuation,
+    spacing, and casing).
+
+    - Include multiple occurrences of the same filler phrase each time it appears;
+    order the list by appearance in the transcript (earliest first).
+
+    - If a filler phrase overlaps with surrounding words (e.g., "and so" within a
+    sentence), still extract only the filler phrase text exactly as it appears.
+
+    - Return the result as a list of strings under the key filler_words.
+
+    '
+  model: openai/gpt-5-nano
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      filler_words: list[str]
+pipeline:
+  steps:
+  - name: extract_fillers
+    input: transcripts
+    operations:
+    - build_filler_lexicon
+    - extract_filler_instances
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results1\pipeline_reproduce1_openai_6.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results1
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_fillers.py
+  metric_key: filler_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

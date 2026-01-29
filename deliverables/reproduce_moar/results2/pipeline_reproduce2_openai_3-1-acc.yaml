@@ -1,0 +1,40 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: extract_measure_words
+  type: map
+  output:
+    schema:
+      measure_words: list[str]
+  prompt: "Extract every exact substring from {{ input.content }} that contains a\
+    \ measure word (a word that denotes a unit, quantity, or collective). Return only\
+    \ a JSON array of strings (no explanation, no extra text). The array should list\
+    \ occurrences in the order they appear in the document.\n\nRules (apply all):\n\
+    1) What counts as a measure word: words that denote units, quantities, containers-as-measures,\
+    \ collectives, or percentages. Examples: time units (second(s), minute(s), hour(s),\
+    \ day(s), month(s), year(s)), distance/area/weight/volume (mile(s), km, meter(s),\
+    \ pound(s), kg, ton, ounce(s), gallon(s), liter(s), cup, drop), currency ($, dollars,\
+    \ cents, EUR, pounds), percent (%) / percent, counts/collectives (people, persons,\
+    \ voters, citizens, nations, states, flock, herd, pack, group, pair, dozen, couple),\
+    \ and container/sample measures when used as a sample unit (\"a drop of water\"\
+    , \"a cup of sugar\", \"a basket of groceries\"). Also include abbreviations and\
+    \ symbols (\"%\", \"kg\", \"mins\", \"$\", etc.).\n\n2) Exact substring requirement:\
+    \ each item must be an exact, contiguous substring copied verbatim from {{ input.content\
+    \ }}. Do not paraphrase or normalize spelling/capitalization.\n\n3) Minimal useful\
+    \ context: return the shortest contiguous substring (preferably no more than ~12\
+    \ words) that clearly shows the measure word and its immediate numeric or noun\
+    \ context needed to understand the measure. Examples of acceptable minimal extracts:\
+    \ \"just over four months\", \"one minute each\", \"more than 30 percent\", \"\
+    a flock of geese\", \"$100\", \"30 to 40 percent\".\n\n4) Include numeric or non-numeric\
+    \ quantifiers when they are directly tied to the unit: \"30 percent\", \"thirty\
+    \ percent\", \"one minute each\", \"between 3 and 5 pounds\", \"3–5 kg\".\n\n\
+    5) Ranges and connectors: if a range or connector is part of the measurement phrase,\
+    \ include the full contiguous range phrase (e.g., \"30 to 40 percent\", \"between\
+    \ 3 and 5 pounds\").\n\n6) Exclusions: do NOT include\n   - pure numeric tokens\
+    \ with no unit (e.g., \"15,000\" alone),\n   - vague quantifiers with no unit\
+    \ (\"a lot\", \"many\", \"several\") unless they directly modify a unit (\"several\
+    \ people\"

@@ -1,0 +1,85 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: extract_filler
+  type: code_map
+  code: "def transform(input_doc):\n    import re\n    text = input_doc.get('content',\
+    \ '') or ''\n    # normalize and lowercase to improve matching\n    normalized\
+    \ = ' '.join(text.lower().split())\n    # common filler words and phrases to detect\n\
+    \    fillers = ['um','uh','like','you know','i mean','so','actually','basically','right','well','hmm','huh']\n\
+    \    # match whole words/phrases using word boundaries\n    pattern = r'\\b(?:um|uh|like|you\
+    \ know|i mean|so|actually|basically|right|well|hmm|huh)\\b'\n    matches = re.findall(pattern,\
+    \ normalized)\n    # return deterministic, low-cost structured outputs for downstream\
+    \ use\n    return {\n        'filler_words': matches,\n        'filler_counts':\
+    \ {w: matches.count(w) for w in set(matches)}\n    }\n"
+  gleaning:
+    validation_prompt: 'You are evaluating the output of an automatic filler-word
+      extractor. You will be provided the original document text and the extractor''s
+      output (a list called ''filler_words'' and a dictionary called ''filler_counts'').
+      Perform the following checks and produce corrected outputs:
+
+
+      1) Verify each item in ''filler_words'' is a genuine filler word or filler phrase
+      commonly used in spontaneous speech (examples: "um", "uh", "like", "you know",
+      "i mean", "so", "actually", "basically", "right", "well", "hmm", "huh"). If
+      any non-filler item appears, remove it.
+
+      2) Detect any missed filler words or phrases that appear in the original text
+      but are not present in ''filler_words'' and add them.
+
+      3) Preserve multi-word fillers (e.g., "you know", "i mean") as single items;
+      do not split them into separate tokens.
+
+      4) Ensure ''corrected_filler_counts'' maps each filler to an integer frequency
+      that matches the number of occurrences you identify. The sum of all counts should
+      equal the total number of detected fillers.
+
+      5) If you cannot confidently determine correctness for an item, flag it in the
+      notes rather than guessing.
+
+
+      Return only a single JSON object with exactly these keys:
+
+      - corrected_filler_words: list of strings (the corrected list of fillers found)
+
+      - corrected_filler_counts: object mapping each filler string to an integer count
+
+      - validation_notes: short string explaining any changes made or any uncertainties
+
+
+      Do not include any other keys or explanatory text outside the JSON object.'
+    num_rounds: 2
+    model: openai/gpt-5-mini
+pipeline:
+  steps:
+  - name: extract_fillers
+    input: transcripts
+    operations:
+    - extract_filler
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results1\pipeline_reproduce1_openai_10.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results1
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_fillers.py
+  metric_key: filler_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

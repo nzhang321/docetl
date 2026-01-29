@@ -1,0 +1,86 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-mini
+bypass_cache: true
+operations:
+- name: split_extract_place_names
+  type: split
+  split_key: content
+  method: token_count
+  method_kwargs:
+    num_tokens: 15000
+    model: openai/gpt-5-mini
+- name: gather_extract_place_names
+  type: gather
+  content_key: content_chunk
+  doc_id_key: split_extract_place_names_id
+  order_key: split_extract_place_names_chunk_num
+  peripheral_chunks:
+    previous:
+      tail:
+        count: 0
+        content_key: content_chunk
+- name: map_extract_place_names_chunks
+  type: map
+  prompt: 'You are analyzing a chunk of a larger document. Extract all instances in:
+    {{ input.content_chunk_rendered }} where the speaker mentions a place name.
+
+    '
+  model: openai/gpt-5-mini
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      place_names: list[str]
+- name: reduce_extract_place_names
+  type: reduce
+  reduce_key: split_extract_place_names_id
+  prompt: 'Combine results from multiple document chunks: Extract all instances where
+    the speaker mentions a place name by combining the place_names lists produced
+    for each chunk: {% for input in inputs %}{{ input.place_names | join('', '') }}{%
+    if not loop.last %}, {% endif %}{% endfor %}. Remove duplicates, normalize capitalization
+    and spacing (e.g., trim whitespace), and return the final result using the same
+    schema as the original operation. Return a JSON object with key "place_names"
+    whose value is a list of unique place names (list[str]).'
+  model: openai/gpt-5-mini
+  litellm_completion_kwargs:
+    temperature: 0
+  output:
+    schema:
+      place_names: list[str]
+  associative: false
+  pass_through: true
+pipeline:
+  steps:
+  - name: extract_place_names
+    input: transcripts
+    operations:
+    - split_extract_place_names
+    - gather_extract_place_names
+    - map_extract_place_names_chunks
+    - reduce_extract_place_names
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results\pipeline_break_openai_5.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_place_names.py
+  metric_key: place_name_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

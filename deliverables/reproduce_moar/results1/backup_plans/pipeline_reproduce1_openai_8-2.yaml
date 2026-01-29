@@ -1,0 +1,26 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: extract_filler
+  type: code_map
+  code: "def transform(input_doc):\n    import re\n    text = input_doc.get('content',\
+    \ '') or ''\n    # normalize and lowercase to improve matching\n    normalized\
+    \ = ' '.join(text.lower().split())\n    # common filler words and phrases to detect\n\
+    \    fillers = ['um','uh','like','you know','i mean','so','actually','basically','right','well','hmm','huh']\n\
+    \    # match whole words/phrases using word boundaries\n    pattern = r'\\b(?:um|uh|like|you\
+    \ know|i mean|so|actually|basically|right|well|hmm|huh)\\b'\n    matches = re.findall(pattern,\
+    \ normalized)\n    # return deterministic, low-cost structured outputs for downstream\
+    \ use\n    return {\n        'filler_words': matches,\n        'filler_counts':\
+    \ {w: matches.count(w) for w in set(matches)}\n    }\n"
+  prompt: "You will be given a single transcript text: {{ input.content }}. Your task\
+    \ is to find conversational filler words/phrases and return a deterministic, structured\
+    \ JSON summary that makes it easy for downstream steps to evaluate frequency,\
+    \ speaker attribution, and context. Follow these exact steps and rules.\n\n1)\
+    \ Preprocessing (do not lose character offsets):\n   - Work from the original\
+    \ raw text for character offsets, but also create a cleaned, lowercase copy for\
+    \ matching.\n   - Replace common broken/unicode-replacement sequences (e.g., the\
+    \

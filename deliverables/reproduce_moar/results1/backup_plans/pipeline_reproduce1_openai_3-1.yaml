@@ -1,0 +1,85 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: extract_filler
+  type: map
+  output:
+    schema:
+      filler_words: list[str]
+  prompt: "From the full transcript text in {{ input.content }}, extract every spoken\
+    \ filler word (filled pause or hesitation token) in the order it occurs and return\
+    \ a JSON array of strings only. Do not return any additional text, explanation,\
+    \ or metadata � just a JSON array (e.g. [\"um (original: 'umm')\", \"you know\
+    \ (original: 'you know')\"]).\n\nRules for what to extract\n- Only extract spoken\
+    \ filler words or filled pauses (e.g., hesitations, interjections used as fillers).\
+    \ Do NOT extract bracketed non-speech annotations such as [laughter], [applause],\
+    \ [music], [inaudible], [truncated], [crosstalk], etc., unless the bracketed text\
+    \ itself clearly contains a spoken filler (rare).\n- Match common filler lexical\
+    \ items and their variants (including elongated and repeated-letter forms). Treat\
+    \ contractions and punctuation as part of surrounding tokens when necessary. The\
+    \ baseline list to match (case-insensitive) includes: um, uh, uh-huh, uh-huh (affirmative/negative\
+    \ variants), mm, mmm, mhm, huh, ah, oh (as hesitation), I mean, you know (y'know,\
+    \ youknow), like (as a discourse marker), well (as a discourse marker), so (as\
+    \ a discourse marker), okay/ok (as a filler), right (as a filler), basically,\
+    \ actually, sort of, kind of, erm/ermm, er, yeah (when used as hesitation), yea\
+    \ (as filler), alright (as filler), and similar short interjections used as hesitations.\n\
+    \nNormalization and output formatting\n- For each occurrence return a single string\
+    \ with this exact format: normalized_form (original: '<original substring from\
+    \ the transcript>')\n  - normalized_form must be a canonical, lowercased token\
+    \ from the set {\"um\",\"uh\",\"mm\",\"mhm\",\"huh\",\"ah\",\"oh\",\"i mean\"\
+    ,\"you know\",\"like\",\"well\",\"so\",\"okay\",\"right\",\"basically\",\"actually\"\
+    ,\"sort of\",\"kind of\",\"erm\"} � map common variants to these canonical tokens\
+    \ (examples: \"ummmmm\" -> \"um\", \"uhhhh\" -> \"uh\", \"y'know\" or \"youknow\"\
+    \ -> \"you know\", \"mhm\"/\"mm-hm\" -> \"mhm\").\n  - original substring must\
+    \ match exactly how the filler appears in the transcript (preserve letters and\
+    \ punctuation) and be enclosed in single quotes as shown.\n- Include every instance\
+    \ (do not deduplicate) and preserve the order of appearance in the transcript.\n\
+    - If a filler spans punctuation or is split across a line break, capture the exact\
+    \ contiguous substring from the transcript that corresponds to the filler.\n\n\
+    Edge cases and special instructions\n- Ignore nonverbal tokens, stage directions,\
+    \ and transcripts artifacts (e.g., speaker labels like \"BIDEN:\" or encoding\
+    \ artifacts such as replacement characters) when they are not part of the spoken\
+    \ filler. If a speaker label is immediately adjacent to the filler token without\
+    \ whitespace and would alter the original substring, include only the spoken filler\
+    \ portion as the original.\n- If a filler is attached to punctuation (e.g., \"\
+    well,\" or \"uh.\"), include the punctuation in the original substring but normalize\
+    \ the canonical form without punctuation.\n- If the transcript contains truncated\
+    \ text markers (e.g., \"[truncated]\" or \"... [truncated]\"), still extract fillers\
+    \ that appear before the marker in the visible text; do not attempt to infer fillers\
+    \ after truncation.\n\nExample outputs (valid JSON array strings):\n[\"um (original:\
+    \ 'ummm')\", \"you know (original: 'you know')\", \"so (original: 'so')\"]\n\n\
+    Process the exact text in {{ input.content }} and output only the JSON array of\
+    \ strings as specified."
+pipeline:
+  steps:
+  - name: extract_fillers
+    input: transcripts
+    operations:
+    - extract_filler
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results1\pipeline_reproduce1_openai_2-1-acc.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results1
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_fillers.py
+  metric_key: filler_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

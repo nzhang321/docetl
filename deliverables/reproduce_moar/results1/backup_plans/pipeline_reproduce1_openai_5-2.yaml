@@ -1,0 +1,105 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: compress_content_by_sentence_context_with_expansion
+  type: code_map
+  code: "def transform(input_doc):\n    import re\n\n    content = input_doc.get('content',\
+    \ '') or ''\n\n    # Filler/disfluency patterns (common conversational fillers\
+    \ and repetitions)\n    filler_terms = [\n        r'uh', r'um', r\"ooh\", r\"\
+    aah\", r\"you\\s+know\", r'i\\s+mean', r\"i'm\\s+like\",\n        r'like', r'so',\
+    \ r'well', r'you\\s+see', r'sort\\s+of', r'kind\\s+of', r'right',\n        r'okay',\
+    \ r'ok', r'and\\s+so', r'by\\s+the\\s+way', r'look', r'frankly', r'let\\s+me',\n\
+    \        r'erm', r'hmm', r'mhm'\n    ]\n\n    # Also capture repeated disfluencies\
+    \ (e.g., \"uh uh\", \"um um\")\n    repeated_pattern = r\"\\b(?:uh|um|erm|hmm)(?:\\\
+    s+\\1)+\\b\"\n\n    combined = r\"\\b(?:\" + r\"|\".join([t for t in filler_terms])\
+    \ + r\")\\b\"\n    combined = f\"(?:{combined})|{repeated_pattern}\"\n    pattern\
+    \ = re.compile(combined, flags=re.IGNORECASE)\n\n    # Find all filler matches\n\
+    \    matches = list(pattern.finditer(content))\n\n    # If no matches, return\
+    \ a conservative excerpt to minimize tokens\n    if not matches:\n        excerpt_len\
+    \ = 1500\n        compressed = content[:excerpt_len]\n        if len(content)\
+    \ > excerpt_len:\n            compressed += \"\\n\\n--- TRUNCATED (NO FILLER MATCHES)\
+    \ ---\\n\\n\"\n        return {'content': compressed}\n\n    # Split content into\
+    \ sentence-like segments and record their spans\n    # This simple sentence tokenizer\
+    \ splits on punctuation or newlines while keeping indices\n    sentences = []\n\
+    \    for m in re.finditer(r\"[^\\n.!?]+[\\n.!?]*\", content):\n        sstart,\
+    \ send = m.start(), m.end()\n        sentence_text = m.group()\n        sentences.append((sstart,\
+    \ send, sentence_text))\n\n    # Map each match to its covering sentence index\
+    \ (or nearest sentence)\n    sentence_indices = set()\n    for mm in matches:\n\
+    \        mstart = mm.start()\n        found = False\n        for idx, (sstart,\
+    \ send, _) in enumerate(sentences):\n            if sstart <= mstart < send:\n\
+    \                sentence_indices.add(idx)\n                found = True\n   \
+    \             break\n        if not found:\n            # If not inside any sentence\
+    \ chunk (edge cases), find nearest\n            distances = [min(abs(mstart -\
+    \ sstart), abs(mstart - send)) for (sstart, send, _) in sentences]\n         \
+    \   if distances:\n                sentence_indices.add(distances.index(min(distances)))\n\
+    \n    # Expand context by including one sentence before and after each matched\
+    \ sentence\n    window_before = 1\n    window_after = 1\n\n    spans = []\n  \
+    \  for idx in sorted(sentence_indices):\n        start_idx = max(0, idx - window_before)\n\
+    \        end_idx = min(len(sentences) - 1, idx + window_after)\n        span_start\
+    \ = sentences[start_idx][0]\n        span_end = sentences[end_idx][1]\n      \
+    \  spans.append((span_start, span_end))\n\n    # Further expand each span by character-level\
+    \ padding to ensure surrounding clause context\n    char_before = 300\n    char_after\
+    \ = 500\n    expanded_spans = []\n    for s, e in spans:\n        es = max(0,\
+    \ s - char_before)\n        ee = min(len(content), e + char_after)\n        expanded_spans.append((es,\
+    \ ee))\n\n    # Merge overlapping or nearby spans\n    expanded_spans.sort(key=lambda\
+    \ x: x[0])\n    merged = [expanded_spans[0]]\n    merge_gap = 100\n    for cur_s,\
+    \ cur_e in expanded_spans[1:]:\n        last_s, last_e = merged[-1]\n        if\
+    \ cur_s <= last_e + merge_gap:\n            # merge\n            merged[-1] =\
+    \ (last_s, max(last_e, cur_e))\n        else:\n            merged.append((cur_s,\
+    \ cur_e))\n\n    # Build compressed text, but cap total size to avoid excessive\
+    \ tokens\n    max_total_chars = 4000\n    parts = []\n    total = 0\n    for i,\
+    \ (s, e) in enumerate(merged, start=1):\n        segment = content[s:e].strip()\n\
+    \        header = f\"--- COMPRESSED SEGMENT {i} ({s}-{e}) ---\\n\"\n        seg_text\
+    \ = header + segment\n        if total + len(seg_text) > max_total_chars:\n  \
+    \          # Truncate this segment to fit remaining budget\n            remaining\
+    \ = max_total_chars - total\n            if remaining > 50:\n                seg_text\
+    \ = seg_text[:remaining] + \"\\n\\n--- TRUNCATED (SIZE LIMIT) ---\"\n        \
+    \        parts.append(seg_text)\n                total += len(seg_text)\n    \
+    \        break\n        parts.append(seg_text)\n        total += len(seg_text)\n\
+    \n    compressed_text = \"\\n\\n\".join(parts)\n\n    # As a safety fallback,\
+    \ if compression somehow produced empty output, provide a short excerpt\n    if\
+    \ not compressed_text:\n        compressed_text = content[:1500]\n        if len(content)\
+    \ > 1500:\n            compressed_text += \"\\n\\n--- TRUNCATED (FALLBACK) ---\\\
+    n\\n\"\n\n    return {'content': compressed_text}\n"
+- name: extract_filler
+  type: map
+  output:
+    schema:
+      filler_words: list[str]
+  prompt: 'Extract all instances of filler words spoken in: {{ input.content }}
+
+    '
+pipeline:
+  steps:
+  - name: extract_fillers
+    input: transcripts
+    operations:
+    - compress_content_by_sentence_context_with_expansion
+    - extract_filler
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results1\pipeline_reproduce1_openai_2-2-acc.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results1
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_fillers.py
+  metric_key: filler_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

@@ -1,0 +1,163 @@
+datasets:
+  transcripts:
+    path: C:\Users\nickz\cuhk_app\docetl\data_sample.json
+    type: file
+default_model: openai/gpt-5-nano
+bypass_cache: true
+operations:
+- name: extract_measure_words
+  type: map
+  output:
+    schema:
+      measure_words: list[str]
+  prompt: 'Extract every exact substring from the text in {{ input.content }} that
+    contains a measure word or unit. A "measure word" means any word or short phrase
+    that denotes a unit, quantity, amount, or a partitive/collective used to quantify
+    things. This includes (but is not limited to):
+
+
+    - Units of time (second(s), minute(s), hour(s), day(s), year(s), month(s))
+
+    - Units of count and people (person/people, candidate(s), voter(s), unit(s), dozen,
+    pair, couple)
+
+    - Collective/partitive nouns used to measure (drop, flock, herd, bunch, handful,
+    basket, pack, slice, bottle)
+
+    - Measures of amount/weight/length/volume (pound(s), kg, kilogram(s), ton(s),
+    mile(s), meter(s), liter(s), cup(s), ounce(s))
+
+    - Currency and monetary expressions ($, dollars, euros, �, etc.)
+
+    - Percentages and ratios (percent, % , fraction formats like 3/4)
+
+    - Scores, points, votes, cases, and similar quantitative nouns
+
+    - Ranges and hyphenated measures (15�20 miles, 5-mile, between 3 and 5 pounds)
+
+
+    Rules for extraction:
+
+    1) Exact substring only: Each item must be an exact contiguous substring from
+    {{ input.content }}. Do not paraphrase, normalize, or invent words. Preserve original
+    casing, punctuation, and spacing.
+
+    2) Must show a unit/measure: Include only substrings that contain a measure word
+    or show a numeric value paired with a unit (e.g., "30 percent", "$100", "two minutes",
+    "a flock of geese"). Pure numeric tokens with no unit (e.g., "15,000" standing
+    alone) must NOT be included.
+
+    3) Concise, minimal excerpt: Prefer the shortest contiguous substring that still
+    clearly contains the unit (aim for <= 12 words). For example, from "more than
+    30 percent" you may return "30 percent" if that contiguous substring appears exactly
+    as-is inside the larger phrase; otherwise return the exact longer phrase found
+    in the document.
+
+    4) Include collectives/partitives only when they function as a measurement/quantity
+    (e.g., "a flock of geese", "a basket of groceries that cost $100" -> extract the
+    shortest substring showing the unit such as "a basket of groceries" or "$100"
+    depending on which minimal contiguous substring appears in the text and clearly
+    shows the measure).
+
+    5) Ranges, fractions, hyphenated measures, and percent symbols are valid (e.g.,
+    "15-20 miles", "3/4 cup", "30%", "30 percent"). Keep the exact characters as in
+    the source.
+
+    6) Exclude positional/relational words that are not measures (e.g., "left side",
+    "right side", "studio audience"), and exclude descriptors that do not express
+    quantity or unit.
+
+    7) Deduplicate: If the same exact substring appears multiple times, include it
+    only once.
+
+
+    Output instructions:
+
+    - Return a JSON object with a single key "measure_words" whose value is a list
+    of the extracted exact substrings (strings). Example: { "measure_words": ["two
+    minutes", "30 percent", "$100"] }
+
+    - Order is not important.
+
+
+    Edge cases to handle explicitly:
+
+    - Currency with symbols ("$100") and spelled-out currency ("100 dollars") � both
+    valid.
+
+    - Spelled-out numbers ("two minutes") and digit forms ("2 minutes") � both valid.
+
+    - When a number appears but the adjacent word is not a unit (e.g., "in 2024"),
+    do not include it unless the adjacent word is a measurement unit.
+
+    - If a shorter contiguous substring that clearly contains the unit exists within
+    a longer phrase, prefer the shorter exact substring�but only if that exact substring
+    appears in the source text.
+
+
+    Be exhaustive: extract every qualifying instance from {{ input.content }} following
+    the rules above and return them exactly as they appear.'
+  gleaning:
+    validation_prompt: "You are a quality judge for a list of extracted measure expressions\
+      \ called \"measure_words\" that were produced from a single source document.\
+      \ Your job is to determine whether the list is correct and to provide precise,\
+      \ actionable corrections if it is not.\n\nChecks to perform for each item:\n\
+      1) Exact excerpt: Each item must be an exact substring taken from the source\
+      \ document (no paraphrase). If an item is not an exact excerpt, mark it invalid\
+      \ and supply the exact excerpt from the document that should replace it.\n2)\
+      \ Contains a measure word: The excerpt must contain a word that denotes a unit,\
+      \ measure, or collective (examples: drop, flock, minute/minutes, pound(s), percent,\
+      \ units, people, nations). Purely numeric tokens alone (e.g., \"15,000\" with\
+      \ no unit) are invalid.\n3) Conciseness: The excerpt should be a short phrase\
+      \ that clearly shows the measurement (preferably no more than ~12 words). If\
+      \ an item is overly long, suggest a shorter exact excerpt from the document\
+      \ that preserves the measure.\n4) No duplicates: Remove duplicate excerpts.\n\
+      \nDecision rule:\n- Return PASS only if every item passes all checks and there\
+      \ are no duplicates.\n- Otherwise return FAIL.\n\nOutput format (must follow\
+      \ exactly):\n- First line: either PASS or FAIL\n- If PASS: on the second line\
+      \ write a brief one-line confirmation (e.g., \"All items are valid.\")\n- If\
+      \ FAIL: on the second line output a JSON object with a single key \"feedback\"\
+      \ whose value is a list of objects. Each object must include:\n  {\n    \"index\"\
+      : <index of the problematic item in the provided list, zero-based>,\n    \"\
+      issue\": \"short explanation of what is wrong (e.g., not an exact excerpt; missing\
+      \ unit; purely numeric; duplicate; too long)\",\n    \"corrected\": \"the exact\
+      \ excerpt from the original document that should replace this item (or null\
+      \ if none found)\"\n  }\n- After the JSON feedback object, add one final short\
+      \ sentence summarizing the top-level fixes needed.\n\nWhen suggesting \"corrected\"\
+      \ excerpts, do not invent text; provide the exact substring as it appears in\
+      \ the document. If multiple valid measure excerpts exist nearby, choose the\
+      \ shortest clear phrase that contains the unit. If no suitable exact excerpt\
+      \ exists for an item, set \"corrected\" to null and explain why in \"issue\"\
+      .\n\nBe concise and precise so the upstream generator can use your feedback\
+      \ to refine the list."
+    num_rounds: 3
+    model: openai/gpt-5-nano
+pipeline:
+  steps:
+  - name: extract_measure_words
+    input: transcripts
+    operations:
+    - extract_measure_words
+  output:
+    type: file
+    path: C:\Users\nickz\cuhk_app\docetl\results\moar_optimization\results2\pipeline_reproduce2_openai_3-2-acc.json
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results2
+  available_models:
+  - openai/gpt-5-mini
+  - openai/gpt-5-nano
+  evaluation_file: evaluate_measures.py
+  metric_key: measure_extraction_score
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+rate_limits:
+  llm_call:
+  - count: 500
+    per: 1
+    unit: minute
+  llm_tokens:
+  - count: 500000
+    per: 1
+    unit: minute

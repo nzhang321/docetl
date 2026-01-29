@@ -1,0 +1,17 @@
+{
+  "optimizer": "moar",
+  "input_pipeline": "pipeline.yaml",
+  "model": "openai/gpt-5-mini",
+  "max_iterations": 10,
+  "exploration_weight": 1.414,
+  "save_dir": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results",
+  "dataset": "transcripts",
+  "start_time": "2026-01-26T09:53:33.419619",
+  "end_time": "2026-01-26T10:34:59.899333",
+  "duration_seconds": 2486.479714,
+  "num_best_nodes": 1,
+  "total_nodes_explored": 0,
+  "total_search_cost": 0.31226436999999996,
+  "evaluation_file": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results\\evaluation_metrics.json",
+  "pareto_frontier_file": "C:\\Users\\nickz\\cuhk_app\\docetl\\results\\moar_optimization\\results\\pareto_frontier.json"
+}

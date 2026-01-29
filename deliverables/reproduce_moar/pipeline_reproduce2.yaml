@@ -1,0 +1,48 @@
+datasets:
+  transcripts:
+    path: data_sample.json
+    type: file
+
+default_model: openai/gpt-5-mini
+bypass_cache: true
+
+operations:
+  - name: extract_measure_words
+    type: map
+    output:
+      schema:
+        measure_words: list[str]
+    prompt: |
+      Extract all instances in: {{ input.content }} where the speaker uses a measure word. These are not numerical words but words specifying a unit such as "drop" in the phrase "a drop of water" or "flock" in "a flock of geese".
+
+pipeline:
+  steps:
+    - name: extract_measure_words
+      input: transcripts
+      operations:
+        - extract_measure_words
+  output:
+    type: file
+    path: results_reproduce2.json
+
+optimizer_config:
+  type: moar
+  save_dir: results/moar_optimization/results2
+  available_models:  # LiteLLM model names - ensure API keys are set in your environment
+    - openai/gpt-5-mini
+    - openai/gpt-5-nano
+  evaluation_file: evaluate_measures.py
+  metric_key: measure_extraction_score  # This must match a key in your evaluation function's return dictionary
+  max_iterations: 10
+  rewrite_agent_model: openai/gpt-5-mini
+  model: openai/gpt-5-mini
+
+rate_limits:
+  llm_call:
+    - count: 500
+      per: 1
+      unit: minute
+  llm_tokens:
+    - count: 500000
+      per: 1
+      unit: minute
