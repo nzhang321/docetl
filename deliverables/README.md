@@ -29,7 +29,7 @@ Of course, it is also necessary to edit the .env file and include your personal 
 
   
 
-All 3 pipelines and the sample dataset used were placed in the root directory, which was also where the commands to run the pipelines were run. The results were output into directories uncreatively named "results/moar_optimization/results" "results/moar_optimization/results1" and "results/moar_optimization/results2". I renamed and reorganized these output files so that they correspond more clearly with their associated pipelines for the sake of the deliverables. These were generated like so:
+All 3 pipelines and the sample dataset used were placed in the root directory, which was also where the commands to run the pipelines were run. The results were output into directories uncreatively named "results/moar_optimization/results" "results/moar_optimization/results1" and "results/moar_optimization/results2". I renamed and reorganized these output files (including `evaluation_metrics.json`, which has most of the relevant information) so that they correspond more clearly with their associated pipelines and for the sake of the deliverables. These were generated like so:
 
 ```
 docetl build pipeline_reproduce1.yaml --optimizer moar
